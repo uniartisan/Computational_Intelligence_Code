@@ -115,6 +115,8 @@ class CartPole:
         :param netParams: a list of floats representing the network parameters (weights and biases) of the MLP
         """
         mlp = self.initMlp(netParams)
+        import time
+        time.sleep(5)
 
         self.env.render()
 
