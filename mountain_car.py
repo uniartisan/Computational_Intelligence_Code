@@ -10,7 +10,7 @@ class MountainCar:
     def __init__(self, randomSeed):
 
         self.env = gym.make('MountainCar-v0')
-        self.env.seed(randomSeed)
+        self.env.reset(seed=randomSeed)
 
     def __len__(self):
         return MAX_STEPS

@@ -20,7 +20,7 @@ class CartPole:
         self.env = gym.make('CartPole-v1')
 
         if randomSeed is not None:
-            self.env.seed(randomSeed)
+            self.env.reset(seed=randomSeed)
 
     def __len__(self):
         return INPUTS * HIDDEN_LAYER + HIDDEN_LAYER * OUTPUTS + HIDDEN_LAYER + OUTPUTS
