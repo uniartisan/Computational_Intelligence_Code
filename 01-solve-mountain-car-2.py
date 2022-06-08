@@ -1,3 +1,6 @@
+# %% [markdown]
+# 找到一组使得小车可以上山的解，使用PSO算法寻找
+
 # %%
 from deap import base
 from deap import creator
@@ -18,8 +21,8 @@ from sko.tools import set_run_mode
 import matplotlib.pyplot as plt
 
 # PSO Algorithm constants:
-pop = 4800
-max_iter = 100
+pop = 9600
+max_iter = 40
 w = 0.95
 c1 = 0.5
 c2 = 0.5
@@ -42,8 +45,10 @@ def result2op(x):
             op.append(2)
         
     return op
+
+
 # fitness calculation
-@jit
+# @jit
 def getCarScore(individual):
     individuals = result2op(individual)
     q_loss = 0
@@ -57,12 +62,12 @@ def getCarScore(individual):
 # 多线程优化
 mode = 'multiprocessing'
 set_run_mode(getCarScore, mode)
-pso = PSO(func=getCarScore, n_dim=200, pop=pop, max_iter=max_iter, lb=0, ub=2.49, w=w, c1=c1, c2=c2)
+pso = PSO(func=getCarScore, n_dim=200, pop=pop,
+          max_iter=max_iter, lb=0, ub=2.49, w=w, c1=c1, c2=c2)
 
 tt = time.time()
 pso.run()
 tt2 = time.time()
-
 
 
 # %%
