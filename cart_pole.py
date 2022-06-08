@@ -3,6 +3,8 @@ import time
 
 import numpy as np
 import pickle
+import time
+from numba import jit
 
 from sklearn.neural_network import MLPRegressor
 
@@ -12,6 +14,7 @@ from sklearn.utils._testing import ignore_warnings
 INPUTS = 4
 HIDDEN_LAYER = 4
 OUTPUTS = 1
+
 
 class CartPole:
 
@@ -39,7 +42,8 @@ class CartPole:
 
         # This will initialize input and output layers, and nodes weights and biases:
         # we are not otherwise interested in training the MLP here, hence the settings max_iter=1 above
-        mlp.fit(np.random.uniform(low=-1, high=1, size=INPUTS).reshape(1, -1), np.ones(OUTPUTS))
+        mlp.fit(np.random.uniform(low=-1, high=1,
+                size=INPUTS).reshape(1, -1), np.ones(OUTPUTS))
 
         # weights are represented as a list of 2 ndarrays:
         # - hidden layer weights: INPUTS x HIDDEN_LAYER
@@ -59,6 +63,7 @@ class CartPole:
 
         return mlp
 
+    @jit
     def getScore(self, netParams):
         """
         calculates the score of a given solution, represented by the list of float-valued network parameters,
@@ -82,6 +87,45 @@ class CartPole:
             actionCounter += 1
             observation, reward, done, info = self.env.step(action)
             totalReward += reward
+
+            if done:
+                break
+            else:
+                action = int(mlp.predict(observation.reshape(1, -1)) > 0)
+                #print(action)
+
+        return totalReward
+
+    @jit
+    def getTrainScore(self, netParams):
+        """
+        calculates the score of a given solution, represented by the list of float-valued network parameters,
+        by creating a corresponding MLP Regressor, initiating an episode of the Cart-Pole environment and
+        running it with the MLP controlling the actions, while using the observations as inputs.
+        Higher score is better.
+        :param netParams: a list of floats representing the network parameters (weights and biases) of the MLP
+        :return: the calculated score value
+        """
+
+        mlp = self.initMlp(netParams)
+
+        self.env.reset()
+
+        actionCounter = 0
+        totalReward = 0
+        observation = self.env.reset()
+        action = int(mlp.predict(observation.reshape(1, -1)) > 0)
+
+        while True:
+            actionCounter += 1
+            observation, reward, done, info = self.env.step(action)
+            # observation 是仿真结果
+            # 推车位置（在-2.4 和 2.4 之间）
+            # 推车速度（-Inf 和 Inf 之间）
+            # 杆的角度（在-41.8°和 41.8°之间）
+            # 杆尖速度（在-Inf 和 Inf 之间）
+            totalReward += reward - \
+                abs(observation[0])*0.2 - abs(observation[3])*0.02
 
             if done:
                 break
@@ -115,10 +159,10 @@ class CartPole:
         :param netParams: a list of floats representing the network parameters (weights and biases) of the MLP
         """
         mlp = self.initMlp(netParams)
-        import time
-        time.sleep(5)
 
         self.env.render()
+
+        time.sleep(5)
 
         actionCounter = 0
         totalReward = 0
@@ -145,6 +189,7 @@ class CartPole:
                 time.sleep(0.03)
                 action = int(mlp.predict(observation.reshape(1, -1)) > 0)
 
+        time.sleep(5)
         self.env.close()
 
 
